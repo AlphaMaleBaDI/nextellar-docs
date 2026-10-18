@@ -1,11 +1,18 @@
 ---
 title: useOfferBook
 description: Query Stellar DEX order books and trading pairs
+date: 2026-06-02
 ---
 
 # useOfferBook
 
 The `useOfferBook` hook queries Stellar's decentralized exchange (DEX) order books, enabling trading interfaces and price discovery.
+
+<Note>
+  **Ships in:** default, js
+  <br />
+  Not in your scaffold? Run `nextellar add defi`
+</Note>
 
 ## Features
 
@@ -17,7 +24,7 @@ The `useOfferBook` hook queries Stellar's decentralized exchange (DEX) order boo
 
 ## Basic Usage
 
-````tsx
+`````tsx
 import { useOfferBook } from '@/hooks/useOfferBook';
 
 export default function OrderBook() {
@@ -80,7 +87,7 @@ interface OfferBookState {
   error: Error | null;
   refresh: () => Promise<void>;
 }
-````
+`````
 
 ## Examples
 
@@ -116,17 +123,44 @@ const totalAskVolume = asks.reduce(
 
 console.log('Buy pressure:', totalBidVolume);
 console.log('Sell pressure:', totalAskVolume);
-````
+```
 
-### Auto-Refresh Order Book
+### Live Updates
+
+Refresh the order book on an interval and clean up the timer when the component unmounts:
 
 ```tsx
-const { refresh } = useOfferBook({ selling, buying });
+import { useEffect } from 'react';
+import { useOfferBook } from '@/hooks/useOfferBook';
 
-useEffect(() => {
-  const interval = setInterval(refresh, 5000); // Refresh every 5s
-  return () => clearInterval(interval);
-}, [refresh]);
+export function LiveOrderBook({ selling, buying }) {
+  const { bids, asks, loading, error, refresh } = useOfferBook({
+    selling,
+    buying,
+  });
+
+  useEffect(() => {
+    const interval = window.setInterval(() => {
+      void refresh();
+    }, 5000);
+
+    return () => window.clearInterval(interval);
+  }, [refresh]);
+
+  if (loading && bids.length === 0 && asks.length === 0) {
+    return <p>Loading order book...</p>;
+  }
+
+  return (
+    <section aria-live="polite">
+      {error && <p role="alert">Unable to update: {error.message}</p>}
+      <p>{bids.length + asks.length} offers, updated every 5 seconds</p>
+      <button type="button" onClick={() => void refresh()} disabled={loading}>
+        Refresh now
+      </button>
+    </section>
+  );
+}
 ```
 
 ## Error Handling
@@ -164,4 +198,5 @@ if (error) {
 ## Related Hooks
 
 - [`useStellarPayment`](/docs/hooks/use-stellar-payment) - Execute trades
-- [`useTrustlines`](/docs/hooks/use-trustlines) - Add asset support
+- [`useTrustlines`](/docs/hooks/use-trustlines) - Add asset support ([adding and removing a trustline](/docs/hooks/use-trustlines#adding-and-removing-a-trustline) example)
+- [`useTransactionHistory`](/docs/hooks/use-transaction-history) - Paginate account activity
