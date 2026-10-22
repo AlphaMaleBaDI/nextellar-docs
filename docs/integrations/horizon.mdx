@@ -83,7 +83,7 @@ An account can store up to 100 data entries, each with a value of up to 64 bytes
 
 Configure once at the provider level:
 
-````tsx
+```tsx
 <WalletProvider horizonUrl="https://horizon.stellar.org">
   <App /> {/* All hooks use mainnet Horizon */}
 </WalletProvider>
@@ -222,4 +222,3 @@ const { balances } = useStellarBalances(publicKey, {
 - [useStellarBalances](/docs/hooks/use-stellar-balances) - Balance fetching hook
 - [useStellarPayment](/docs/hooks/use-stellar-payment) - Payment transactions
 - [useTransactionHistory](/docs/hooks/use-transaction-history) - Transaction queries
-````
